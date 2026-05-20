@@ -1,10 +1,10 @@
-# 💸 Expense Tracker API
+# Expense Tracker API
 
 A simple and clean RESTful API for tracking personal expenses, built with **FastAPI**, **SQLModel**, and **SQLite**.
 
 ---
 
-## 🚀 Features
+## Features
 
 - Create, read, update, and delete expenses
 - Persistent storage using SQLite
@@ -14,7 +14,7 @@ A simple and clean RESTful API for tracking personal expenses, built with **Fast
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Technology | Purpose |
 |---|---|
@@ -26,14 +26,14 @@ A simple and clean RESTful API for tracking personal expenses, built with **Fast
 
 ---
 
-## 📋 Prerequisites
+## Prerequisites
 
 - Python **3.13+**
 - [uv](https://docs.astral.sh/uv/getting-started/installation/) installed
 
 ---
 
-## ⚙️ Installation & Setup
+## Installation & Setup
 
 **1. Clone the repository**
 
@@ -67,7 +67,7 @@ Once the server is running, visit:
 
 ---
 
-## 🔌 API Endpoints
+## API Endpoints
 
 ### Expenses
 
@@ -83,7 +83,7 @@ Once the server is running, visit:
 
 ### Request & Response Examples
 
-#### ➕ Create an Expense — `POST /create`
+####  Create an Expense — `POST /create`
 
 **Request Body:**
 
@@ -110,7 +110,7 @@ Once the server is running, visit:
 }
 ```
 
-#### ✏️ Update an Expense — `PUT /update/{id}`
+####  Update an Expense — `PUT /update/{id}`
 
 **Request Body** (all fields are optional):
 
@@ -121,7 +121,7 @@ Once the server is running, visit:
 }
 ```
 
-#### 🗑️ Delete an Expense — `DELETE /expense-delete/{id}`
+#### Delete an Expense — `DELETE /expense-delete/{id}`
 
 **Response:**
 
@@ -133,7 +133,7 @@ Once the server is running, visit:
 
 ---
 
-## 🗂️ Project Structure
+## Project Structure
 
 ```
 expense-tracker-fastapi/
@@ -148,7 +148,7 @@ expense-tracker-fastapi/
 
 ---
 
-## 🧾 Data Model
+##  Data Model
 
 ### Expense
 
@@ -164,7 +164,7 @@ expense-tracker-fastapi/
 
 ---
 
-## 📦 Dependencies
+## Dependencies
 
 ```toml
 dependencies = [
