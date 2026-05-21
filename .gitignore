@@ -1,0 +1,19 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+.venv/
+
+# Database files
+*.db
+
+# Environment files
+.env
+
+# Uvicorn / uv
+uv.lock
+
+# IDE and OS files
+.DS_Store
+*.swp
