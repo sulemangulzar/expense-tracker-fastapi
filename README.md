@@ -149,7 +149,7 @@ expense-tracker-fastapi/
 ## Expense Model
 
 | Field | Type | Description |
-|---|---|
+|---|---|---|
 | `id` | `int` | Primary key |
 | `amount` | `float` | Expense amount |
 | `description` | `str` | Description of the expense |
