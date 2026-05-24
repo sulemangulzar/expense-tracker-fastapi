@@ -2,8 +2,8 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
-from app.models import Expense
-from app.schemas import ExpenseCreate, ExpenseUpdate
+from app.models.models import Expense
+from app.schemas.schemas import ExpenseCreate, ExpenseUpdate
 
 
 class ExpenseService:
@@ -12,7 +12,7 @@ class ExpenseService:
 
     async def get_all(self) -> list[Expense]:
         result = await self.session.execute(select(Expense))
-        return result.scalars().all()
+        return list(result.scalars().all())
 
     async def get(self, id: int) -> Expense:
         expense = await self.session.get(Expense, id)

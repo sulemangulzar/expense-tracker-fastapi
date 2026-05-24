@@ -1,1 +1,17 @@
-from app.main import app
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+
+from app.database.database import create_all_tables
+from app.routers.routers import master_router
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    await create_all_tables()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
+
+app.include_router(master_router)

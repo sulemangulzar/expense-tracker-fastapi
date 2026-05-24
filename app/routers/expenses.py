@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.dependencies import ServiceDep
-from app.schemas import ExpenseCreate, ExpenseRead, ExpenseUpdate
+from app.schemas.schemas import ExpenseCreate, ExpenseRead, ExpenseUpdate
 
 router = APIRouter(prefix="/expense")
 
