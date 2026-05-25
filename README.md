@@ -1,14 +1,16 @@
 # Expense Tracker FastAPI
 
-A simple beginner-friendly Expense Tracker API built with FastAPI, SQLModel, async SQLAlchemy, and PostgreSQL.
+A simple Expense Tracker API built with FastAPI, SQLModel, async SQLAlchemy, PostgreSQL, and Docker Compose.
 
 The app supports:
 
 - User signup
 - User login
+- User logout
+- Protected expense endpoints
 - Expense CRUD
-- PostgreSQL with Docker Compose
-- Automatic table creation on app startup
+- PostgreSQL database in Docker
+- Automatic table creation when the app starts
 
 ---
 
@@ -18,12 +20,13 @@ The app supports:
 |---|---|
 | FastAPI | API framework |
 | SQLModel | Models and database tables |
-| SQLAlchemy Async | Async database connection |
-| PostgreSQL | Main database |
+| SQLAlchemy Async | Async database work |
+| PostgreSQL | Database |
 | asyncpg | Async PostgreSQL driver |
 | Docker Compose | Run PostgreSQL easily |
 | uv | Python package manager |
-| Uvicorn | Run FastAPI app |
+| Uvicorn | Run the FastAPI server |
+| Scalar | Alternative API documentation |
 
 ---
 
@@ -65,12 +68,13 @@ expense-tracker-fastapi/
 - Python 3.13+
 - uv
 - Docker Desktop
+- pgAdmin4, DBeaver, TablePlus, or any PostgreSQL client if you want to view the DB visually
 
 ---
 
 ## Setup
 
-### 1. Clone the project
+### 1. Clone the repository
 
 ```bash
 git clone git@github.com:sulemangulzar/expense-tracker-fastapi.git
@@ -83,15 +87,15 @@ cd expense-tracker-fastapi
 uv sync
 ```
 
-### 3. Start PostgreSQL
+### 3. Start PostgreSQL with Docker
 
 ```bash
 docker compose up -d
 ```
 
-This starts PostgreSQL in Docker.
+Your database runs in Docker.
 
-Database connection details:
+Connection details:
 
 ```text
 Host: localhost
@@ -101,7 +105,10 @@ User: postgres
 Password: postgres
 ```
 
-The Docker container uses internal PostgreSQL port `5432`, but your Mac connects through port `5433`.
+Important:
+
+- Docker/Postgres uses `5432` inside the container.
+- Your Mac/pgAdmin connects through `5433`.
 
 ---
 
@@ -120,7 +127,7 @@ JWT_SECRET=my-secret-key
 JWT_ALGORITHM=HS256
 ```
 
-You can also use one full database URL instead:
+Or use one full database URL:
 
 ```env
 DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5433/fastapi
@@ -128,7 +135,7 @@ JWT_SECRET=my-secret-key
 JWT_ALGORITHM=HS256
 ```
 
-If `DATABASE_URL` is invalid or missing, the app builds the PostgreSQL URL from the `POSTGRES_*` values.
+If `DATABASE_URL` is missing or invalid, the app builds the URL from the `POSTGRES_*` values.
 
 ---
 
@@ -138,24 +145,54 @@ If `DATABASE_URL` is invalid or missing, the app builds the PostgreSQL URL from 
 uv run uvicorn main:app --reload --port 8001
 ```
 
-Open Swagger docs:
+Open the docs:
 
 ```text
-http://127.0.0.1:8001/docs
+Swagger: http://127.0.0.1:8001/docs
+Scalar:  http://127.0.0.1:8001/scalar
 ```
 
 ---
 
-## Database
+## Database and pgAdmin4
 
-Tables are created automatically when the app starts.
+The app creates tables automatically when it starts.
 
 Tables:
 
 - `user`
 - `expense`
 
-To check the database directly:
+### Connect in pgAdmin4
+
+Create a new server in pgAdmin4 with these values:
+
+```text
+Name: expense-tracker-fastapi
+Host name/address: localhost
+Port: 5433
+Maintenance database: fastapi
+Username: postgres
+Password: postgres
+```
+
+Then refresh and open:
+
+```text
+Servers
+└── expense-tracker-fastapi
+    └── Databases
+        └── fastapi
+            └── Schemas
+                └── public
+                    └── Tables
+                        ├── expense
+                        └── user
+```
+
+If you do not see tables, right-click `Tables` and click `Refresh`.
+
+### Check database from terminal
 
 ```bash
 docker exec -it expense-tracker-fastapi psql -U postgres -d fastapi
@@ -169,7 +206,7 @@ SELECT * FROM "user";
 SELECT * FROM expense;
 ```
 
-Exit `psql`:
+Exit:
 
 ```sql
 \q
@@ -177,24 +214,41 @@ Exit `psql`:
 
 ---
 
+## Authentication Flow
+
+1. Signup with `/signup`
+2. Login with `/login`
+3. Copy the `access_token`
+4. In Swagger, click `Authorize`
+5. Paste the token value
+6. Now you can use the expense endpoints
+7. Use `/logout` to invalidate the current token
+
+Note: logout stores the logged-out token in memory. If the server restarts, that memory is cleared. This keeps the code simple for learning.
+
+---
+
 ## API Endpoints
 
 ### User Routes
 
-| Method | Path | Description |
-|---|---|---|
-| `POST` | `/signup` | Create a user |
-| `POST` | `/login` | Login and get an access token |
+| Method | Path | Description | Login Required |
+|---|---|---|---|
+| `POST` | `/signup` | Create a user | No |
+| `POST` | `/login` | Login and get token | No |
+| `POST` | `/logout` | Logout current token | Yes |
 
 ### Expense Routes
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/expense/all` | Get all expenses |
-| `GET` | `/expense/{id}` | Get one expense |
-| `POST` | `/expense/create` | Create an expense |
-| `PUT` | `/expense/update/{id}` | Update an expense |
-| `DELETE` | `/expense/delete/{id}` | Delete an expense |
+All expense routes require login.
+
+| Method | Path | Description | Login Required |
+|---|---|---|---|
+| `GET` | `/expense/all` | Get all expenses | Yes |
+| `GET` | `/expense/{id}` | Get one expense | Yes |
+| `POST` | `/expense/create` | Create an expense | Yes |
+| `PUT` | `/expense/update/{id}` | Update an expense | Yes |
+| `DELETE` | `/expense/delete/{id}` | Delete an expense | Yes |
 
 ---
 
@@ -238,7 +292,27 @@ Response:
 }
 ```
 
+### Logout
+
+Send the token in the `Authorization` header:
+
+```text
+Authorization: Bearer token-here
+```
+
+In Swagger, click `Authorize` and paste the token value.
+
+Response:
+
+```json
+{
+  "message": "Logged out successfully"
+}
+```
+
 ### Create Expense
+
+This request requires login.
 
 ```json
 {
@@ -279,7 +353,7 @@ Stop database:
 docker compose down
 ```
 
-Stop database and remove stored data:
+Stop database and delete stored data:
 
 ```bash
 docker compose down -v
@@ -297,11 +371,19 @@ Check Docker logs:
 docker logs expense-tracker-fastapi
 ```
 
+Check tables:
+
+```bash
+docker exec expense-tracker-fastapi psql -U postgres -d fastapi -c "\dt"
+```
+
 ---
 
-## Notes for Beginners
+## Beginner Notes
 
-- You do not need to create the PostgreSQL server manually. Docker Compose starts it for you.
-- You do not need to create tables manually. FastAPI creates them on startup.
-- If the API request succeeds, the data is saved in Docker PostgreSQL.
-- Use port `5433` in DB tools like pgAdmin, DBeaver, or TablePlus.
+- You do not create the PostgreSQL server manually. Docker Compose starts it.
+- You do not create tables manually. FastAPI creates them on startup.
+- Use port `5433` in pgAdmin4.
+- Expense endpoints return `401` if you are not logged in.
+- Login gives you a token.
+- Logout blocks the current token until the app restarts.

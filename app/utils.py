@@ -3,12 +3,16 @@ import hashlib
 import hmac
 import json
 from datetime import datetime, timedelta, timezone
+from uuid import uuid4
 
 from app.config import settings
+
+logged_out_tokens: set[str] = set()
 
 
 def create_access_token(data: dict, expiry: timedelta = timedelta(days=1)) -> str:
     payload = data.copy()
+    payload["jti"] = str(uuid4())
     payload["exp"] = (datetime.now(timezone.utc) + expiry).timestamp()
 
     payload_text = json.dumps(payload)
@@ -45,3 +49,11 @@ def decode_token(token: str) -> dict | None:
         return payload
     except Exception:
         return None
+
+
+def logout_token(jti: str) -> None:
+    logged_out_tokens.add(jti)
+
+
+def is_token_logged_out(jti: str) -> bool:
+    return jti in logged_out_tokens

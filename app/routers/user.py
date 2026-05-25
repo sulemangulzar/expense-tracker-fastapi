@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 
-from app.api.dependencies import userServiceDep
+from app.api.dependencies import TokenDep, userServiceDep
 from app.schemas.schemas import UserCreate, UserLogin, UserRead
+from app.utils import logout_token
 
 router = APIRouter()
 
@@ -14,3 +15,9 @@ async def signup(user_create: UserCreate, service: userServiceDep):
 @router.post("/login")
 async def login(user: UserLogin, service: userServiceDep):
     return await service.login(user)
+
+
+@router.post("/logout")
+async def logout(token_data: TokenDep):
+    logout_token(token_data["jti"])
+    return {"message": "Logged out successfully"}
