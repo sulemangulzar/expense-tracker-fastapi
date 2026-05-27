@@ -387,3 +387,7 @@ docker exec expense-tracker-fastapi psql -U postgres -d fastapi -c "\dt"
 - Expense endpoints return `401` if you are not logged in.
 - Login gives you a token.
 - Logout blocks the current token until the app restarts.
+
+
+## License
+- No license included yet.
